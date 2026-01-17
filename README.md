@@ -68,7 +68,14 @@ builder.Services.AddColorPicker();
 
 ## <a name="ReleaseNotes"></a>Release Notes
 
-<details open="open"><summary>Version 4.0.2</summary>
+<details open="open"><summary>Version 4.1.1</summary>
+
+>- Performance & memory optimization: default colors are now static and shared across all instances
+>- Fixed memory leak in OnParametersSet() that caused unbounded list growth
+>- Zero allocations when using default color palette
+</details>
+
+<details><summary>Version 4.0.2</summary>
 >- Added AddColorPicker() to simplify declaration
 </details>
 

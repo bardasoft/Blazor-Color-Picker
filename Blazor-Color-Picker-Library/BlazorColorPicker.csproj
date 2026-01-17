@@ -8,7 +8,7 @@
 
     <!-- Package metadata -->
     <PackageId>BlazorColorPicker</PackageId>
-    <Version>4.1.0</Version>
+    <Version>4.1.1</Version>
     <Authors>Christophe Peugnet</Authors>
     <Copyright>Copyright 2020-2026</Copyright>
     <Description>Opens a modal palette with the Material colors for Blazor Application</Description>

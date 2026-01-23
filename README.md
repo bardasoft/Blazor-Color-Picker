@@ -66,9 +66,34 @@ builder.Services.AddColorPicker();
 }
 ```
 
+## Find Closest Color
+
+When the selected color doesn't exist in the palette, you can enable automatic matching to the closest available color using the `FindClosestIfNotFound` parameter:
+
+```csharp
+var parameters = new ColorPickerParameters
+{
+    ColorSelected = "#8B4513",  // SaddleBrown - not in the default palette
+    FindClosestIfNotFound = true,
+};
+color = await ColorPickerService.ShowColorPicker(parameters);
+```
+
+The algorithm uses a **weighted Euclidean distance** in RGB color space, which accounts for human color perception (green differences are more noticeable than red or blue).
+
+> [!NOTE]
+> Color comparison is case-insensitive: `#ec407a` will match `#EC407A` in the palette.
+
 ## <a name="ReleaseNotes"></a>Release Notes
 
-<details open="open"><summary>Version 4.1.1</summary>
+<details open="open"><summary>Version 4.2.0</summary>
+
+>- New feature: `FindClosestIfNotFound` parameter - when the selected color is not in the palette, automatically highlights the closest matching color
+>- Color comparison is now case-insensitive (`#ec407a` matches `#EC407A`)
+>- Uses weighted Euclidean distance algorithm for perceptually accurate color matching
+</details>
+
+<details><summary>Version 4.1.1</summary>
 
 >- Performance & memory optimization: default colors are now static and shared across all instances
 >- Fixed memory leak in OnParametersSet() that caused unbounded list growth

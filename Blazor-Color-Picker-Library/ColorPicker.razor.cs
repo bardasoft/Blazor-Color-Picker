@@ -82,6 +82,8 @@ public partial class ColorPicker
 
     private IReadOnlyList<string> colors = DefaultColors;
 
+    private string? HighlightedColor { get; set; }
+
     protected ElementReference Element;
 
     protected override void OnInitialized()
@@ -102,6 +104,9 @@ public partial class ColorPicker
         colors = parameters.MyColorPallet is { Length: > 0 }
             ? parameters.MyColorPallet
             : DefaultColors;
+
+        // Determine which color to highlight
+        HighlightedColor = DetermineHighlightedColor(parameters.ColorSelected, colors, parameters.FindClosestIfNotFound);
 
         StateHasChanged();
 
@@ -131,6 +136,87 @@ public partial class ColorPicker
     private void Close()
     {
         IsVisible = false;
+        HighlightedColor = null;
         StateHasChanged();
+    }
+
+    private bool IsColorHighlighted(string item)
+    {
+        // If we found a closest color match, use it
+        if (HighlightedColor is not null)
+            return string.Equals(HighlightedColor, item, StringComparison.OrdinalIgnoreCase);
+
+        // Default behavior: case-insensitive match with selected color
+        return string.Equals(Parameters.ColorSelected, item, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string? DetermineHighlightedColor(string colorSelected, IReadOnlyList<string> palette, bool findClosest)
+    {
+        // Only compute closest color when explicitly requested
+        if (!findClosest || string.IsNullOrWhiteSpace(colorSelected))
+            return null;
+
+        // If color already exists in palette, no need to find closest
+        if (palette.Any(c => c.Equals(colorSelected, StringComparison.OrdinalIgnoreCase)))
+            return null;
+
+        // Find closest color
+        return TryParseHexColor(colorSelected, out var target)
+            ? FindClosestColor(target, palette)
+            : null;
+    }
+
+    private static string? FindClosestColor((int R, int G, int B) target, IReadOnlyList<string> palette)
+    {
+        string? closest = null;
+        var minDistance = double.MaxValue;
+
+        foreach (var hex in palette)
+        {
+            if (!TryParseHexColor(hex, out var color))
+                continue;
+
+            var distance = ColorDistance(target, color);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closest = hex;
+            }
+        }
+
+        return closest;
+    }
+
+    private static double ColorDistance((int R, int G, int B) c1, (int R, int G, int B) c2)
+    {
+        // Weighted Euclidean distance for better perceptual accuracy
+        var rMean = (c1.R + c2.R) / 2.0;
+        var dR = c1.R - c2.R;
+        var dG = c1.G - c2.G;
+        var dB = c1.B - c2.B;
+
+        return Math.Sqrt((2 + rMean / 256) * dR * dR + 4 * dG * dG + (2 + (255 - rMean) / 256) * dB * dB);
+    }
+
+    private static bool TryParseHexColor(string hex, out (int R, int G, int B) color)
+    {
+        color = default;
+
+        if (string.IsNullOrWhiteSpace(hex))
+            return false;
+
+        var span = hex.AsSpan().TrimStart('#');
+        if (span.Length != 6)
+            return false;
+
+        if (int.TryParse(span[..2], System.Globalization.NumberStyles.HexNumber, null, out var r) &&
+            int.TryParse(span[2..4], System.Globalization.NumberStyles.HexNumber, null, out var g) &&
+            int.TryParse(span[4..6], System.Globalization.NumberStyles.HexNumber, null, out var b))
+        {
+            color = (r, g, b);
+            return true;
+        }
+
+        return false;
     }
 }

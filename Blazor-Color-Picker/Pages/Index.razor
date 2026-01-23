@@ -6,12 +6,12 @@
 <a href="https://www.nuget.org/packages/BlazorColorPicker/"><img src="https://img.shields.io/nuget/v/BlazorColorPicker.svg" /></a>
 <br />
 
-<button class="btn btn-primary" @onclick="OpenModal">
+<button class="btn btn-primary" @onclick="@OpenModal">
     <div style="background-color:@color" class="buttonColor"></div> Select a default Color
 </button>
 
 <button class="btn btn-primary" @onclick="OpenModalCustom">
-    <div style="background-color:@customColor" class="buttonColor"></div> Select a custom Color
+    <div style="background-color:@customColor" class="buttonColor"></div> Select a custom Colors
 </button>
 
 
@@ -19,11 +19,14 @@
     <div style="background-color:@customColorSize" class="buttonColor"></div> Custom sizes
 </button>
 
-              
+<button class="btn btn-primary" @onclick="OpenModalUnmatched">
+	<div style="background-color:@unmatchedColor" class="buttonColor"></div> Select a unmatched Color
+</button>
 @code {
-	private string color = "#F1F7E9";
+	private string color = "#ec407a";
 	private string customColor = "#FFFFFF";
 	private string customColorSize = "#42A5F6";
+	private string unmatchedColor = "#8B4513";
 
 	private async Task OpenModal()
 	{
@@ -57,5 +60,15 @@
 			Style = "width: 304px; height: 304px",
 		};
 		customColorSize = await ColorPickerService.ShowColorPicker(parameters);
-	} 
+	}
+
+	private async Task OpenModalUnmatched()
+	{
+		var parameters = new ColorPickerParameters
+		{
+			ColorSelected = unmatchedColor,
+			FindClosestIfNotFound = true,
+		};
+		unmatchedColor = await ColorPickerService.ShowColorPicker(parameters);
+	}
 }

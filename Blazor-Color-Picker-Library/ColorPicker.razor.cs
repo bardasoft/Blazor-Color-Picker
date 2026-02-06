@@ -78,6 +78,88 @@ public partial class ColorPicker
         ? $"background-color:{Parameters.OverwriteBackgroundColor};"
         : string.Empty;
 
+    private string PaletteStyle
+    {
+        get
+        {
+            const int cellSize = 32;
+            const int maxRowsSmall = 5;  // Pour petites palettes (≤50 couleurs)
+            const int maxRowsLarge = 10; // Pour grandes palettes (>50 couleurs)
+            const int maxColumns = 20;
+
+            var totalColors = colors.Count;
+
+            // Calculate rows and columns based on color count
+            int rows, columns;
+
+            if (totalColors == 0)
+            {
+                rows = 1;
+                columns = 1;
+            }
+            else if (totalColors <= maxRowsSmall)
+            {
+                // Very small palette: single row
+                rows = 1;
+                columns = totalColors;
+            }
+            else if (totalColors <= 50)
+            {
+                // Small to medium palette: max 5 rows
+                rows = maxRowsSmall;
+                columns = (int)Math.Ceiling((double)totalColors / rows);
+            }
+            else
+            {
+                // Large palette: max 10 rows
+                rows = maxRowsLarge;
+                columns = (int)Math.Ceiling((double)totalColors / rows);
+
+                // Cap columns at maximum
+                if (columns > maxColumns)
+                {
+                    columns = maxColumns;
+                    rows = (int)Math.Ceiling((double)totalColors / columns);
+                }
+            }
+
+            // Calculate optimal dimensions
+            var width = columns * cellSize;
+            var height = rows * cellSize;
+
+            // Parse custom dimensions from Parameters.Style if present
+            var customWidth = ParseDimension(Parameters.Style, "width");
+            var customHeight = ParseDimension(Parameters.Style, "height");
+
+            // For mobile: swap custom dimensions or computed dimensions
+            var mobileWidth = customHeight ?? $"{height}px";
+            var mobileHeight = customWidth ?? $"{width}px";
+
+            return $"--color-picker-rows: {rows}; --color-picker-columns: {columns}; " +
+                   $"--color-picker-computed-width: {width}px; --color-picker-computed-height: {height}px; " +
+                   $"--color-picker-mobile-width: {mobileWidth}; --color-picker-mobile-height: {mobileHeight}; " +
+                   $"width: {customWidth ?? $"{width}px"}; height: {customHeight ?? $"{height}px"};";
+        }
+    }
+
+    private static string? ParseDimension(string? style, string property)
+    {
+        if (string.IsNullOrWhiteSpace(style))
+            return null;
+
+        // Simple regex-free parsing: find "width:" or "height:"
+        var index = style.IndexOf($"{property}:", StringComparison.OrdinalIgnoreCase);
+        if (index == -1)
+            return null;
+
+        var start = index + property.Length + 1; // Skip "property:"
+        var end = style.IndexOf(';', start);
+        if (end == -1)
+            end = style.Length;
+
+        return style.Substring(start, end - start).Trim();
+    }
+
     private string CssClass => IsVisible ? "color-picker-show" : "color-picker-hide";
 
     private IReadOnlyList<string> colors = DefaultColors;

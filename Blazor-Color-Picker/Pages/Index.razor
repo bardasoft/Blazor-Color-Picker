@@ -6,22 +6,58 @@
 <a href="https://www.nuget.org/packages/BlazorColorPicker/"><img src="https://img.shields.io/nuget/v/BlazorColorPicker.svg" /></a>
 <br />
 
-<button class="btn btn-primary" @onclick="@OpenModal">
+<button class="btn btn-secondary" @onclick="@OpenModal">
     <div style="background-color:@color" class="buttonColor"></div> Select a default Color
 </button>
 
-<button class="btn btn-primary" @onclick="OpenModalCustom">
-    <div style="background-color:@customColor" class="buttonColor"></div> Select a custom Colors
+<h2>Usage</h2>
+
+<CodeBlock Language="CodeLanguage.Razor"
+		   Code=@(@"
+@using BlazorColorPicker
+
+@inject IColorPickerService ColorPickerService
+
+<button @onclick=""OpenModal"">
+    <div style=""background-color:@color"" class=""buttonColor""></div> Select a Color
 </button>
+		   	 	 ") />
+
+<CodeBlock Language="CodeLanguage.CSharp"
+		   Code=@(@"
+private async Task OpenModal()
+{
+	var parameters = new ColorPickerParameters
+	{
+	ColorSelected = color,
+	};
+
+    color = await ColorPickerService.ShowColorPicker(parameters);
+}
+		   	 	 ") />
 
 
-<button class="btn btn-primary" @onclick="OpenModalCustomSizes">
-    <div style="background-color:@customColorSize" class="buttonColor"></div> Custom sizes
-</button>
+<div class="mt-4">
+	<h5>Use  your own color palette</h5>
+	<button class="btn btn-primary" @onclick="OpenModalCustom">
+		<div style="background-color:@customColor" class="buttonColor"></div> Select a custom Colors
+	</button>
+</div>
 
-<button class="btn btn-primary" @onclick="OpenModalUnmatched">
-	<div style="background-color:@unmatchedColor" class="buttonColor"></div> Select a unmatched Color
-</button>
+<div class="mt-4">
+	<h5>Change the size</h5>
+	<button class="btn btn-primary" @onclick="OpenModalCustomSizes">
+		<div style="background-color:@customColorSize" class="buttonColor"></div> Custom sizes
+	</button>
+</div>
+
+<div class="mt-4">
+	<h5>Find the closest color</h5>
+	<button class="btn btn-primary" @onclick="OpenModalUnmatched">
+		<div style="background-color:@unmatchedColor" class="buttonColor"></div> Select a unmatched Color
+	</button>
+</div>
+
 @code {
 	private string color = "#ec407a";
 	private string customColor = "#FFFFFF";
@@ -39,8 +75,14 @@
 
 	private async Task OpenModalCustom()
 	{
-		string[] colors = new string[] { "#FFFFFF", "#000000", "#999999", "#03A97E", "#04B573",
-			"#05BF69", "#06CA5F", "#06D554", "#07E148", "#08EC3E" };
+		string[] colors = new string[] { 
+			"#F44336", "#E91E63", "#9C27B0", "#673AB7", 
+			"#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", 
+			"#009688", "#4CAF50", "#8BC34A", "#CDDC39", 
+			"#FFEB3B", "#FFC107", "#FF9800", "#FF5722",
+			"#795548", "#9E9E9E", "#607D8B", "#000000",
+			"#FFFFFF", "#ECEFF1", "#CFD8DC", "#B0BEC5"
+		};
 
 		var parameters = new ColorPickerParameters
 		{
